@@ -1,8 +1,9 @@
 class TasksController < ApplicationController
+  before_action :require_user_logged_in, only: [:show, :edit, :new]
   before_action :set_task, only: [:show, :edit, :update, :destroy]
   
   def index
-    @tasks = Task.all
+    @pagy, @tasks = pagy(Task.all, items: 20)
   end
 
   def show
