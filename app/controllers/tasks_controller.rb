@@ -3,10 +3,14 @@ class TasksController < ApplicationController
   before_action :set_task, only: [:show, :edit, :update, :destroy]
   
   def index
-    @pagy, @tasks = pagy(Task.all, items: 20)
+    if logged_in?
+      @task = current_user.tasks.build  # form_with 用
+      @pagy, @tasks = pagy(current_user.tasks.order(id: :desc))
+    end
   end
 
   def show
+    @task = current_user.tasks.find(params[:id])
   end
 
   def new
@@ -14,21 +18,24 @@ class TasksController < ApplicationController
   end
 
   def create
-    @task = Task.new(task_params)
+    @task = current_user.tasks.build(task_params)
 
     if @task.save
       flash[:success] = 'Task が正常に投稿されました'
       redirect_to @task
     else
+      @pagy, @tasks = pagy(current_user.tasks.order(id: :desc))
       flash.now[:danger] = 'Task が投稿されませんでした'
       render :new
     end
   end
 
   def edit
+    @task = current_user.tasks.find(params[:id])
   end
 
   def update
+    @task = current_user.tasks.find(params[:id])
     @task = Task.find(params[:id])
 
     if @task.update(task_params)
@@ -41,6 +48,7 @@ class TasksController < ApplicationController
   end
 
   def destroy
+    @task = current_user.tasks.find(params[:id])
     @task.destroy
 
     flash[:success] = 'Task は正常に削除されました'
@@ -56,5 +64,12 @@ class TasksController < ApplicationController
   # Strong Parameter
   def task_params
     params.require(:task).permit(:content, :status)
+  end
+  
+  def correct_user
+    @task = current_user.tasks.find_by(id: params[:id])
+    unless @task
+      redirect_to root_url
+    end
   end
 end
