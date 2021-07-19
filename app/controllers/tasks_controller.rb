@@ -3,14 +3,9 @@ class TasksController < ApplicationController
   before_action :correct_user,only: [:show, :edit, :update, :destroy]
   
   def index
-    @task = current_user.tasks.build  # form_with 用
     @pagy, @tasks = pagy(current_user.tasks.order(id: :desc))
   end
-
-  def show
-    @task = current_user.tasks.find(params[:id])
-  end
-
+  
   def new
     @task = Task.new
   end
@@ -28,12 +23,7 @@ class TasksController < ApplicationController
     end
   end
 
-  def edit
-    @task = current_user.tasks.find(params[:id])
-  end
-
   def update
-    @task = current_user.tasks.find(params[:id])
     @task = Task.find(params[:id])
 
     if @task.update(task_params)
@@ -46,7 +36,6 @@ class TasksController < ApplicationController
   end
 
   def destroy
-    @task = current_user.tasks.find(params[:id])
     @task.destroy
 
     flash[:success] = 'Task は正常に削除されました'
@@ -54,11 +43,6 @@ class TasksController < ApplicationController
   end
   
   private
-  
-  def set_task
-    @task = Task.find(params[:id])
-  end
-
   # Strong Parameter
   def task_params
     params.require(:task).permit(:content, :status)
