@@ -3,8 +3,11 @@ class TasksController < ApplicationController
   before_action :correct_user,only: [:show, :edit, :update, :destroy]
   
   def index
-    @task = current_user.tasks.build  # form_with 用
     @pagy, @tasks = pagy(current_user.tasks.order(id: :desc))
+  end
+  
+  def show
+    @task = current_user.tasks.find(params[:id])
   end
   
   def new
@@ -22,6 +25,10 @@ class TasksController < ApplicationController
       flash.now[:danger] = 'Task が投稿されませんでした'
       render :new
     end
+  end
+  
+  def edit
+    @task = current_user.tasks.find(params[:id])
   end
 
   def update
